@@ -1,0 +1,7 @@
+text,vader_sentiment,bert_sentiment
+the professor explained the concepts very well,positive,positive
+i found the assignments too difficult,negative,negative
+the course was okay not great but not bad either,positive,positive
+loved the interactive sessions,positive,positive
+the lectures were boring and hard to follow,negative,negative
+neutral experience overall,neutral,negative

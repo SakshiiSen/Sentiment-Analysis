@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Feedback Sentiment Analysis</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        .container { max-width: 800px; margin-top: 40px; }
+        .chart-img { max-width: 100%; height: auto; margin-top: 20px; }
+        .table { margin-top: 20px; }
+        .feedback-form { margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4">Student Feedback Sentiment Analysis</h1>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-warning">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+    <form class="feedback-form" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="file" class="form-label">Upload CSV File (with 'text' column):</label>
+            <input class="form-control" type="file" name="file" id="file" accept=".csv">
+        </div>
+        <div class="mb-3">
+            <label for="feedback" class="form-label">Or Enter Feedback Text:</label>
+            <textarea class="form-control" name="feedback" id="feedback" rows="3" placeholder="Type your feedback here..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Analyze</button>
+    </form>
+    {% if results %}
+        <div class="card mb-4">
+          <div class="card-body">
+            <h3 class="card-title mb-3">Sentiment Summary</h3>
+            <div class="row text-center">
+              <div class="col">
+                <span class="badge bg-success">Positive</span><br>
+                VADER: {{ vader_counts['positive'] if vader_counts and 'positive' in vader_counts else 0 }}<br>
+                BERT: {{ bert_counts['positive'] if bert_counts and 'positive' in bert_counts else 0 }}
+              </div>
+              <div class="col">
+                <span class="badge bg-secondary">Neutral</span><br>
+                VADER: {{ vader_counts['neutral'] if vader_counts and 'neutral' in vader_counts else 0 }}<br>
+                BERT: {{ bert_counts['neutral'] if bert_counts and 'neutral' in bert_counts else 0 }}
+              </div>
+              <div class="col">
+                <span class="badge bg-danger">Negative</span><br>
+                VADER: {{ vader_counts['negative'] if vader_counts and 'negative' in vader_counts else 0 }}<br>
+                BERT: {{ bert_counts['negative'] if bert_counts and 'negative' in bert_counts else 0 }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <h3>Results Preview</h3>
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered align-middle">
+            <thead>
+              <tr>
+                <th>Feedback Text</th>
+                <th>VADER Sentiment</th>
+                <th>BERT Sentiment</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in results %}
+                <tr>
+                  <td>{{ row['text'] }}</td>
+                  <td>
+                    {% if row['vader_sentiment'] == 'positive' %}
+                      <span class="badge bg-success">Positive</span>
+                    {% elif row['vader_sentiment'] == 'negative' %}
+                      <span class="badge bg-danger">Negative</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Neutral</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row['bert_sentiment'] == 'positive' %}
+                      <span class="badge bg-success">Positive</span>
+                    {% elif row['bert_sentiment'] == 'negative' %}
+                      <span class="badge bg-danger">Negative</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Neutral</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+    {% endif %}
+    {% if chart_url %}
+        <h3>Sentiment Distribution</h3>
+        <img src="{{ chart_url }}" class="chart-img img-fluid rounded shadow" alt="Sentiment Chart">
+    {% endif %}
+    {% if download_url %}
+        <a href="{{ download_url }}" class="btn btn-success mt-3">Download Full Results CSV</a>
+    {% endif %}
+</div>
+</body>
+</html>
